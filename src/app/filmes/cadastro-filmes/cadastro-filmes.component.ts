@@ -1,6 +1,12 @@
 import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { MatDialog } from "@angular/material/dialog";
+import { Router } from "@angular/router";
+import { FilmesService } from "src/app/core/filmes.service";
+import { AlertaComponent } from "src/app/shared/components/alerta/alerta.component";
 import { ValidarCamposService } from "src/app/shared/components/campos/validar-campos.service";
+import { Alert } from "src/app/shared/models/alerta";
+import { Filme } from "src/app/shared/models/filme";
 
 @Component({
   selector: "dio-cadastro-filmes",
@@ -13,7 +19,10 @@ export class CadastroFilmesComponent implements OnInit {
 
   constructor(
     public validation: ValidarCamposService,
-    private fb: FormBuilder
+    public dialog: MatDialog,
+    private fb: FormBuilder,
+    private filmesServices: FilmesService,
+    private router: Router
   ) {}
 
   get f() {
@@ -49,15 +58,52 @@ export class CadastroFilmesComponent implements OnInit {
     ];
   }
 
-  salvar(): void {
+  submit(): void {
     this.cadastro.markAllAsTouched;
     if (this.cadastro.invalid) {
       return;
     }
-    alert(`Sucesso!\n\n ${JSON.stringify(this.cadastro.value, null, 4)}`);
+    const filme = this.cadastro.getRawValue() as Filme;
+    this.salvar(filme);
+    // alert(`Sucesso!\n\n ${JSON.stringify(this.cadastro.value, null, 4)}`);
   }
 
   reinicarForm(): void {
     this.cadastro.reset();
+  }
+
+  private salvar(filme: Filme): void {
+    this.filmesServices.salvar(filme).subscribe(
+      () => {
+        const config = {
+          data: {
+            btnSuccess: "ir para a Listagem",
+            btnCancel: "Cadastrar um novo filme",
+            colorBtnCancel: "primary",
+            closeBtnEnable: true,
+          } as Alert,
+        };
+        const dialogRef = this.dialog.open(AlertaComponent, config);
+        dialogRef.afterClosed().subscribe((option: boolean) => {
+          if (option) {
+            this.router.navigateByUrl("filmes");
+          } else {
+            this.reinicarForm();
+          }
+        });
+      },
+      () => {
+        const config = {
+          data: {
+            title: "Erro ao Salvar o registo!",
+            description:
+              "Não foi possivel salvar o seu registro. Tente mais tarde!",
+            colorBtnSuccess: "warn",
+            btnSuccess: "Fechar",
+          } as Alert,
+        };
+        this.dialog.open(AlertaComponent, config);
+      }
+    );
   }
 }

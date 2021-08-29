@@ -2,7 +2,7 @@
 <div class="main-div">
   <mat-card class="center width50">
 
-    <form autocomplete="off" [formGroup]="cadastro" (ngSubmit)="salvar()" (ngReset)="reinicarForm()">
+    <form autocomplete="off" [formGroup]="cadastro" (ngSubmit)="submit()" (ngReset)="reinicarForm()">
       <mat-card-content>
 
         <dio-input-text titulo="Título *" controlName="titulo" [formGroup]="cadastro"></dio-input-text>
