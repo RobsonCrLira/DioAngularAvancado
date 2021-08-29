@@ -11,6 +11,7 @@ export class InputSelectComponent {
   @Input() titulo: string;
   @Input() formGroup: FormGroup;
   @Input() controlName: string;
+  @Input() options: Array<string>;
   constructor(public validation: ValidarCamposService) {}
 
   get formControl(): AbstractControl {

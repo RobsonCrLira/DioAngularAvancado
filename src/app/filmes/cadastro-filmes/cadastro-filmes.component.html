@@ -2,7 +2,7 @@
 <div class="main-div">
   <mat-card class="center width50">
 
-    <form [formGroup]="cadastro" (ngSubmit)="salvar()" (ngReset)="reinicarForm()">
+    <form autocomplete="off" [formGroup]="cadastro" (ngSubmit)="salvar()" (ngReset)="reinicarForm()">
       <mat-card-content>
 
         <dio-input-text titulo="Título *" controlName="titulo" [formGroup]="cadastro"></dio-input-text>
@@ -18,8 +18,11 @@
 
         <dio-input-text titulo="Link IMDb " controlName="urlIMDb" [formGroup]="cadastro"></dio-input-text>
 
-        <dio-input-select titulo="Genero *" controlName="genero" [formGroup]="cadastro"></dio-input-select>
+        <dio-input-select titulo="Genero *" [options]="genres" controlName="genero" [formGroup]="cadastro">
+        </dio-input-select>
+
       </mat-card-content>
+
       <mat-card-actions>
         <button type="submit" color="accent" mat-raised-button>Salvar</button>
         <button type="reset" color="warn" mat-raised-button>Cancelar</button>
