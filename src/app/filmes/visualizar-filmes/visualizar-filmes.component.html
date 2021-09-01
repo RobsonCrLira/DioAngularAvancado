@@ -1,0 +1,17 @@
+<mat-list>
+  <mat-list-item>Título: {{movie.titulo}} </mat-list-item>
+  <mat-list-item>Data de Lançamento: {{movie.dataLancamento | date: 'dd/MM/yyyy'}}</mat-list-item>
+  <mat-list-item>Gênero: {{movie.genero}}</mat-list-item>
+  <mat-list-item>Descrição: {{movie.descricao}}</mat-list-item>
+  <mat-list-item>Nota: <a [href]="movie.urlIMDb" target="_blank">{{movie.nota}} </a> </mat-list-item>
+  <img mat-card-image [src]="movie.urlFoto || semFoto">
+</mat-list>
+
+<mat-card-actions>
+  <button color="accent" mat-raised-button (click)="editar()">Editar</button>
+  <button color="warn" mat-raised-button (click)="excluir()">Excluir</button>
+</mat-card-actions>
+
+<ng-template #semFilme>
+  <h1 class="main-div full-width">Nenhum registro encontrado</h1>
+</ng-template>

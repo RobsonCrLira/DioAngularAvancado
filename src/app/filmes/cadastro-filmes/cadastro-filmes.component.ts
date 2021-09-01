@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import { MatDialog } from "@angular/material/dialog";
-import { Router } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { FilmesService } from "src/app/core/filmes.service";
 import { AlertaComponent } from "src/app/shared/components/alerta/alerta.component";
 import { ValidarCamposService } from "src/app/shared/components/campos/validar-campos.service";
@@ -14,6 +14,7 @@ import { Filme } from "src/app/shared/models/filme";
   styleUrls: ["./cadastro-filmes.component.scss"],
 })
 export class CadastroFilmesComponent implements OnInit {
+  id: number;
   cadastro: FormGroup;
   genres: Array<string>;
 
@@ -22,7 +23,8 @@ export class CadastroFilmesComponent implements OnInit {
     public dialog: MatDialog,
     private fb: FormBuilder,
     private filmesServices: FilmesService,
-    private router: Router
+    private router: Router,
+    private activatedRoute: ActivatedRoute
   ) {}
 
   get f() {
@@ -30,6 +32,77 @@ export class CadastroFilmesComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.id = this.activatedRoute.snapshot.params["id"];
+    if (this.id) {
+      this.filmesServices
+        .toView(this.id)
+        .subscribe((filme: Filme) => this.createForm(filme));
+    } else {
+      // se não, então crie em branco
+      this.createForm(this.createFromIsBlank());
+    }
+  }
+
+  submit(): void {
+    this.cadastro.markAllAsTouched;
+    if (this.cadastro.invalid) {
+      return;
+    }
+    const filme = this.cadastro.getRawValue() as Filme;
+    if (this.id) {
+      this.editar(filme);
+    } else {
+      this.salvar(filme);
+    }
+  }
+
+  reinicarForm(): void {
+    this.cadastro.reset();
+  }
+
+  private editar(filme: Filme): void {
+    this.filmesServices.edit(filme).subscribe(
+      () => {
+        const config = {
+          data: {
+            description: "Seu registro foi atualizado com sucesso!",
+            btnSuccess: "Ir para a listagem",
+          } as Alert,
+        };
+        const dialogRef = this.dialog.open(AlertaComponent, config);
+        dialogRef
+          .afterClosed()
+          .subscribe(() => this.router.navigateByUrl("filmes"));
+      },
+      () => {
+        const config = {
+          data: {
+            title: "Erro ao editar o registro!",
+            description:
+              "Não conseguimos editar seu registro, favor tentar novamente mais tarde",
+            colorBtnSuccess: "warn",
+            btnSuccess: "Fechar",
+          } as Alert,
+        };
+        this.dialog.open(AlertaComponent, config);
+      }
+    );
+  }
+
+  private createFromIsBlank(): Filme {
+    return {
+      id: null,
+      titulo: null,
+      dataLancamento: null,
+      urlFoto: null,
+      descricao: null,
+      nota: null,
+      urlIMDb: null,
+      genero: null,
+    } as Filme;
+  }
+
+  private createForm(filme: Filme): void {
     this.cadastro = this.fb.group({
       titulo: [
         "",
@@ -56,20 +129,6 @@ export class CadastroFilmesComponent implements OnInit {
       "Romance",
       "Terror",
     ];
-  }
-
-  submit(): void {
-    this.cadastro.markAllAsTouched;
-    if (this.cadastro.invalid) {
-      return;
-    }
-    const filme = this.cadastro.getRawValue() as Filme;
-    this.salvar(filme);
-    // alert(`Sucesso!\n\n ${JSON.stringify(this.cadastro.value, null, 4)}`);
-  }
-
-  reinicarForm(): void {
-    this.cadastro.reset();
   }
 
   private salvar(filme: Filme): void {
